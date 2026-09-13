@@ -75,24 +75,39 @@ try {
             '/photos' => ['App\Controllers\PhotoController', 'getAll'],
             '/messages' => ['App\Controllers\MessageController', 'getApproved'],
             '/time-since' => ['App\Controllers\HomeController', 'getTimeSince'],
-            
+
+            // 预览路由（需预览token或管理员token，不允许公开/搜索引擎访问）
+            '/preview/site' => ['App\Controllers\PreviewController', 'site'],
             // 后台路由
             '/admin/dashboard' => ['App\Controllers\AdminController', 'dashboard'],
             '/admin/config' => ['App\Controllers\ConfigController', 'getAll'],
             '/admin/life-events' => ['App\Controllers\LifeEventController', 'getAllAdmin'],
             '/admin/photos' => ['App\Controllers\PhotoController', 'getAllAdmin'],
             '/admin/messages' => ['App\Controllers\MessageController', 'getAll'],
+            '/admin/life-events/{id}/preview-token' => ['App\Controllers\LifeEventController', 'previewToken'],
+            '/admin/photos/{id}/preview-token' => ['App\Controllers\PhotoController', 'previewToken'],
+            '/admin/config/preview-token' => ['App\Controllers\ConfigController', 'previewToken'],
         ],
         'POST' => [
             '/auth/login' => ['App\Controllers\AuthController', 'login'],
             '/auth/logout' => ['App\Controllers\AuthController', 'logout'],
             '/messages' => ['App\Controllers\MessageController', 'create'],
-            
+
+            // 预览页内的发布操作（预览token鉴权，非后台JWT）
+            '/preview/publish' => ['App\Controllers\PreviewController', 'publish'],
+
             // 后台路由
             '/admin/config' => ['App\Controllers\ConfigController', 'update'],
+            '/admin/config/save-draft' => ['App\Controllers\ConfigController', 'update'],
+            '/admin/config/publish' => ['App\Controllers\ConfigController', 'publish'],
+            '/admin/config/discard' => ['App\Controllers\ConfigController', 'discard'],
             '/admin/life-events' => ['App\Controllers\LifeEventController', 'create'],
             '/admin/photos' => ['App\Controllers\PhotoController', 'create'],
             '/admin/upload' => ['App\Controllers\UploadController', 'upload'],
+            '/admin/life-events/{id}/publish' => ['App\Controllers\LifeEventController', 'publish'],
+            '/admin/photos/{id}/publish' => ['App\Controllers\PhotoController', 'publish'],
+            '/admin/life-events/{id}/discard' => ['App\Controllers\LifeEventController', 'discard'],
+            '/admin/photos/{id}/discard' => ['App\Controllers\PhotoController', 'discard'],
         ],
         'PUT' => [
             '/admin/life-events/{id}' => ['App\Controllers\LifeEventController', 'update'],
@@ -116,7 +131,7 @@ try {
             if (strpos($route, '{') !== false) {
                 $pattern = preg_replace('#\{(\w+)\}#', '(\d+)', $route);
                 $pattern = '#^' . $pattern . '$#';
-                
+
                 if (preg_match($pattern, $path, $matches)) {
                     $handler = $routeHandler;
                     // 将参数转换为整数
@@ -129,15 +144,22 @@ try {
             }
         }
     }
-    
+
     if ($handler) {
         [$controllerClass, $action] = $handler;
-        
-        // 检查是否需要认证
+
+        // 后台接口：需要管理员 JWT
         if (strpos($path, '/admin') === 0 && $path !== '/auth/login') {
             require_once __DIR__ . '/../src/Middleware/AuthMiddleware.php';
             $authMiddleware = new \App\Middleware\AuthMiddleware();
             $authMiddleware->handle();
+        }
+
+        // 预览接口：需要有效预览 token（或管理员 JWT），禁止公开访问
+        if (strpos($path, '/preview') === 0) {
+            require_once __DIR__ . '/../src/Middleware/PreviewAuthMiddleware.php';
+            $previewAuth = new \App\Middleware\PreviewAuthMiddleware();
+            $previewAuth->handle();
         }
         
         // 加载控制器

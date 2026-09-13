@@ -30,13 +30,20 @@ class AdminController
         $eventModel = new LifeEvent();
         $photoModel = new Photo();
         $messageModel = new Message();
+        $configModel = new SiteConfig();
         
         return Response::success([
             'stats' => [
                 'lifeEventsCount' => $eventModel->count(),
                 'photosCount' => $photoModel->count(),
                 'messagesCount' => $messageModel->count(),
-                'pendingMessagesCount' => $messageModel->countPending()
+                'pendingMessagesCount' => $messageModel->countPending(),
+                // 草稿相关统计：提醒家属"还有未发布内容"
+                'draftEventsCount' => $eventModel->count('has_draft = 1'),
+                'draftPhotosCount' => $photoModel->count('has_draft = 1'),
+                'unpublishedEventsCount' => $eventModel->count('status = 0'),
+                'unpublishedPhotosCount' => $photoModel->count('status = 0'),
+                'draftConfigCount' => $configModel->countDrafts(),
             ],
             'currentUser' => $GLOBALS['currentUser'] ?? null
         ]);

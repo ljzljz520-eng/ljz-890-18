@@ -9,26 +9,45 @@ class JWT
 {
     private static string $secretKey = 'memorial_website_secret_key_2024_yiningyun';
     private static int $expireTime = 86400; // 24小时
-    
+
+    /**
+     * 预览链接 token 有效期：7天
+     */
+    public static int $previewExpireTime = 604800;
+
     /**
      * 生成Token
      */
     public static function generate(array $payload): string
     {
+        return self::buildToken($payload, self::$expireTime);
+    }
+
+    /**
+     * 生成预览链接专用Token（带 scope/id 声明，7天有效）
+     */
+    public static function generatePreviewToken(array $scope = [], int $ttl = null): string
+    {
+        $payload = array_merge(['typ' => 'preview'], $scope);
+        return self::buildToken($payload, $ttl ?? self::$previewExpireTime);
+    }
+
+    private static function buildToken(array $payload, int $ttl): string
+    {
         $header = [
             'typ' => 'JWT',
             'alg' => 'HS256'
         ];
-        
+
         $payload['iat'] = time();
-        $payload['exp'] = time() + self::$expireTime;
-        
+        $payload['exp'] = time() + $ttl;
+
         $headerEncoded = self::base64UrlEncode(json_encode($header));
         $payloadEncoded = self::base64UrlEncode(json_encode($payload));
-        
+
         $signature = hash_hmac('sha256', "{$headerEncoded}.{$payloadEncoded}", self::$secretKey, true);
         $signatureEncoded = self::base64UrlEncode($signature);
-        
+
         return "{$headerEncoded}.{$payloadEncoded}.{$signatureEncoded}";
     }
     
@@ -75,12 +94,23 @@ class JWT
     {
         $headers = getallheaders();
         $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
-        
+
         if (preg_match('/Bearer\s+(.+)$/i', $authHeader, $matches)) {
             return $matches[1];
         }
-        
+
         return null;
+    }
+
+    /**
+     * 获取请求中的Token：优先 Authorization 头，其次 preview_token 查询参数
+     * （预览页面在新标签打开，无法携带自定义请求头）
+     */
+    public static function getTokenFromRequest(): ?string
+    {
+        return self::getTokenFromHeader()
+            ?? ($_GET['preview_token'] ?? null)
+            ?? null;
     }
     
     /**

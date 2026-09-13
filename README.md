@@ -60,11 +60,49 @@
 - 🎨 **维吾尔族特色设计** - 融入民族纹样与配色
 
 ### 后台功能
-- 📊 仪表盘统计
+- 📊 仪表盘统计（含待发布草稿提醒）
 - ⚙️ 网站配置管理（所有前端内容可编辑）
 - 📅 生平事件CRUD
 - 🖼️ 照片上传管理（支持20MB图片）
 - 💬 寄语审核管理
+- 📝 **草稿 → 预览 → 发布 工作流**（编辑的文章、照片说明、首页文案先存草稿，预览确认后才上线）
+- 🔒 **预览链接防收录**（noindex 头 + meta robots + robots.txt + 签名 token）
+
+---
+
+## ✍️ 草稿 / 预览 / 发布机制
+
+家属修改生平事件、照片标题/说明或首页文案时，严格遵循"先草稿、再预览、后发布"：
+
+1. **保存草稿**：所有修改只写入 `draft_data`（文章/照片）或 `site_config_drafts`（首页文案），
+   线上首页与公开接口完全不受影响，未完成的文字绝不会出现在前台。
+2. **预览确认**：点击"预览"会在新标签打开 `/preview?preview_token=xxx`，
+   页面样式与前台一致，并合并显示全部草稿内容；草稿条目带黄色虚线/标签标记。
+   - 预览 token 为 HMAC 签名，有效期 7 天；无 token 访问预览接口返回 403。
+   - 预览页通过 `X-Robots-Tag: noindex, nofollow, noarchive`、`<meta name="robots" content="noindex">`
+     及 `robots.txt` 三重防护，不会被搜索引擎收录；同时设置 `Referrer-Policy: no-referrer` 防止 token 外泄。
+3. **发布**：确认无误后点击页面上的"立即发布"（或后台列表中的 ✅），草稿才合并到正式内容，前台立即更新。
+4. **放弃草稿**：可随时放弃修改，恢复为线上版本（从未发布过的新草稿会被直接删除）。
+
+> 公开接口 `/api/config`、`/api/life-events`、`/api/photos` 只返回已发布内容（`status = 1` 且不含草稿改动）。
+
+### 新增/变更接口
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/preview/site?preview_token=xxx | 获取合并草稿后的整站预览数据（需预览token） |
+| POST | /api/preview/publish | 在预览页内发布（权限受 token 的 scope 限制） |
+| POST | /api/admin/life-events/{id}/publish | 发布单条事件草稿 |
+| POST | /api/admin/life-events/{id}/discard | 放弃单条事件草稿 |
+| GET | /api/admin/life-events/{id}/preview-token | 生成事件预览链接 |
+| POST | /api/admin/photos/{id}/publish | 发布单张照片草稿 |
+| POST | /api/admin/photos/{id}/discard | 放弃单张照片草稿 |
+| GET | /api/admin/photos/{id}/preview-token | 生成照片预览链接 |
+| POST | /api/admin/config/publish | 发布全部首页文案草稿 |
+| POST | /api/admin/config/discard | 放弃全部首页文案草稿 |
+| GET | /api/admin/config/preview-token[?scope=site] | 生成文案/整站预览链接 |
+
+> 新建事件/照片默认即为草稿（`status=0`）；编辑保存（PUT）只更新草稿，不影响线上版本。
 
 ---
 

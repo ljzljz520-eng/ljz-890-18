@@ -56,39 +56,49 @@ INSERT INTO site_config (config_key, config_value, description) VALUES
 -- =====================================================
 CREATE TABLE IF NOT EXISTS life_events (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL COMMENT '事件标题',
-    event_date DATE NOT NULL COMMENT '事件日期',
-    content TEXT COMMENT '事件详情',
+    title VARCHAR(255) NOT NULL COMMENT '事件标题（已发布版本）',
+    event_date DATE NOT NULL COMMENT '事件日期（已发布版本）',
+    content TEXT COMMENT '事件详情（已发布版本）',
     image_url VARCHAR(500) COMMENT '配图URL',
-    sort_order INT DEFAULT 0 COMMENT '排序顺序',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+    sort_order INT DEFAULT 0 COMMENT '排序顺序（已发布版本）',
+    status TINYINT NOT NULL DEFAULT 0 COMMENT '状态：0-草稿（从未发布），1-已发布',
+    draft_data TEXT COMMENT '草稿暂存（JSON），含待发布的修改内容；NULL表示无未发布草稿',
+    has_draft TINYINT NOT NULL DEFAULT 0 COMMENT '是否存在草稿改动：0-否，1-是',
+    published_at DATETIME NULL COMMENT '首次/最近发布时间',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='生平事件表';
 
--- 插入示例生平事件
-INSERT INTO life_events (title, event_date, content, sort_order, created_at) VALUES
-('出生', '1974-05-22', '亚尔买买提・阿不来提出生于新疆，开启了他精彩的人生旅程。', 1, NOW()),
-('求学时期', '1980-09-01', '开始接受教育，展现出勤奋好学的品质。', 2, NOW()),
-('成家立业', '1998-06-15', '组建了幸福的家庭，成为一位负责任的丈夫和父亲。', 3, NOW()),
-('辛勤工作', '2000-03-01', '投身事业，用勤劳的双手为家庭创造美好生活。', 4, NOW()),
-('永远离开', '2011-11-01', '不幸离世，留下了无尽的思念和怀念。', 5, NOW());
+-- 插入示例生平事件（均为已发布状态）
+INSERT INTO life_events (title, event_date, content, sort_order, status, has_draft, published_at, created_at) VALUES
+('出生', '1974-05-22', '亚尔买买提・阿不来提出生于新疆，开启了他精彩的人生旅程。', 1, 1, 0, NOW(), NOW()),
+('求学时期', '1980-09-01', '开始接受教育，展现出勤奋好学的品质。', 2, 1, 0, NOW(), NOW()),
+('成家立业', '1998-06-15', '组建了幸福的家庭，成为一位负责任的丈夫和父亲。', 3, 1, 0, NOW(), NOW()),
+('辛勤工作', '2000-03-01', '投身事业，用勤劳的双手为家庭创造美好生活。', 4, 1, 0, NOW(), NOW()),
+('永远离开', '2011-11-01', '不幸离世，留下了无尽的思念和怀念。', 5, 1, 0, NOW(), NOW());
 
 -- =====================================================
 -- 照片表
 -- =====================================================
 CREATE TABLE IF NOT EXISTS photos (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL COMMENT '照片标题',
-    image_url VARCHAR(500) NOT NULL COMMENT '图片URL',
-    description TEXT COMMENT '照片描述',
-    sort_order INT DEFAULT 0 COMMENT '排序顺序',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+    title VARCHAR(255) NOT NULL COMMENT '照片标题（已发布版本）',
+    image_url VARCHAR(500) NOT NULL COMMENT '图片URL（已发布版本）',
+    description TEXT COMMENT '照片描述（已发布版本）',
+    sort_order INT DEFAULT 0 COMMENT '排序顺序（已发布版本）',
+    status TINYINT NOT NULL DEFAULT 0 COMMENT '状态：0-草稿（从未发布），1-已发布',
+    draft_data TEXT COMMENT '草稿暂存（JSON），含待发布的修改内容；NULL表示无未发布草稿',
+    has_draft TINYINT NOT NULL DEFAULT 0 COMMENT '是否存在草稿改动：0-否，1-是',
+    published_at DATETIME NULL COMMENT '首次/最近发布时间',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='照片表';
 
--- 插入示例照片
-INSERT INTO photos (title, image_url, description, sort_order, created_at) VALUES
-('温馨时刻', '/assets/images/gallery/photo1.png', '父亲与家人在一起的温馨时光。', 1, NOW()),
-('工作中的父亲', '/assets/images/gallery/photo2.png', '父亲认真工作的样子，总是那么专注。', 2, NOW()),
-('节日合影', '/assets/images/gallery/photo3.png', '节日期间的全家福，幸福洋溢。', 3, NOW());
+-- 插入示例照片（均为已发布状态）
+INSERT INTO photos (title, image_url, description, sort_order, status, has_draft, published_at, created_at) VALUES
+('温馨时刻', '/assets/images/gallery/photo1.png', '父亲与家人在一起的温馨时光。', 1, 1, 0, NOW(), NOW()),
+('工作中的父亲', '/assets/images/gallery/photo2.png', '父亲认真工作的样子，总是那么专注。', 2, 1, 0, NOW(), NOW()),
+('节日合影', '/assets/images/gallery/photo3.png', '节日期间的全家福，幸福洋溢。', 3, 1, 0, NOW(), NOW());
 
 -- =====================================================
 -- 纪念寄语表
@@ -108,8 +118,20 @@ INSERT INTO messages (author_name, content, status, created_at) VALUES
 ('家乡的朋友', '还记得他总是乐于助人的样子，这样的好人值得被永远铭记。', 1, NOW());
 
 -- =====================================================
+-- 网站配置草稿表（暂存"首页文案"等待发布修改，与正式配置隔离）
+-- =====================================================
+CREATE TABLE IF NOT EXISTS site_config_drafts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    config_key VARCHAR(100) NOT NULL UNIQUE COMMENT '配置键',
+    config_value TEXT COMMENT '草稿配置值',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '草稿更新时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='网站配置草稿表';
+
+-- =====================================================
 -- 创建索引优化查询性能
 -- =====================================================
 CREATE INDEX idx_life_events_date ON life_events(event_date);
+CREATE INDEX idx_life_events_status ON life_events(status);
 CREATE INDEX idx_photos_sort ON photos(sort_order);
+CREATE INDEX idx_photos_status ON photos(status);
 CREATE INDEX idx_messages_status ON messages(status);

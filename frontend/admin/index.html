@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="/admin/css/admin.css?v=20260913">
 </head>
 <body>
     <!-- 侧边栏 -->
@@ -110,6 +110,9 @@
                 <div class="quick-actions">
                     <h2>快捷操作</h2>
                     <div class="action-buttons">
+                        <button class="action-btn" onclick="previewSiteDraft()">
+                            <span>👁</span> 预览整站草稿
+                        </button>
                         <button class="action-btn" onclick="navigateTo('life-events')">
                             <span>➕</span> 添加生平事件
                         </button>
@@ -129,7 +132,23 @@
                     <h1>网站配置</h1>
                     <p>管理网站的基础信息和显示内容</p>
                 </div>
-                
+
+                <!-- 草稿状态提示条 -->
+                <div class="draft-banner" id="configDraftBanner" style="display:none;">
+                    <div class="draft-banner-info">
+                        <span class="draft-banner-icon">📝</span>
+                        <div>
+                            <strong id="configDraftTitle">有待发布的首页文案草稿</strong>
+                            <p id="configDraftDesc">草稿不会影响线上首页，预览确认后请点击"发布"。</p>
+                        </div>
+                    </div>
+                    <div class="draft-banner-actions">
+                        <button type="button" class="btn btn-secondary" onclick="previewConfig()">👁 预览</button>
+                        <button type="button" class="btn btn-success" onclick="publishConfig()">✅ 发布</button>
+                        <button type="button" class="btn btn-danger" onclick="discardConfigDrafts()">放弃草稿</button>
+                    </div>
+                </div>
+
                 <form class="config-form" id="configForm">
                     <div class="form-section">
                         <h3>基础信息</h3>
@@ -200,8 +219,11 @@
                     </div>
                     
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">保存配置</button>
+                        <button type="submit" class="btn btn-primary">💾 保存草稿</button>
+                        <button type="button" class="btn btn-secondary" onclick="previewConfig()">👁 预览效果</button>
+                        <button type="button" class="btn btn-success" onclick="publishConfig()">✅ 发布到首页</button>
                     </div>
+                    <p class="form-tip">提示：点击"保存草稿"不会改动线上首页；预览确认无误后，再点"发布到首页"。</p>
                 </form>
             </div>
             
@@ -222,6 +244,7 @@
                                 <th>日期</th>
                                 <th>标题</th>
                                 <th>内容</th>
+                                <th>状态</th>
                                 <th>排序</th>
                                 <th>操作</th>
                             </tr>
@@ -299,12 +322,14 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeEventModal()">取消</button>
-                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="submit" class="btn btn-primary">💾 保存草稿</button>
+                    <button type="button" class="btn btn-success" id="eventPreviewBtn" onclick="previewCurrentEvent()">👁 预览</button>
+                    <button type="button" class="btn btn-success" id="eventPublishBtn" onclick="publishCurrentEvent()">✅ 发布</button>
                 </div>
             </form>
         </div>
     </div>
-    
+
     <!-- 模态框：照片编辑 -->
     <div class="modal-overlay" id="photoModal">
         <div class="modal">
@@ -341,7 +366,9 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closePhotoModal()">取消</button>
-                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="submit" class="btn btn-primary">💾 保存草稿</button>
+                    <button type="button" class="btn btn-success" id="photoPreviewBtn" onclick="previewCurrentPhoto()">👁 预览</button>
+                    <button type="button" class="btn btn-success" id="photoPublishBtn" onclick="publishCurrentPhoto()">✅ 发布</button>
                 </div>
             </form>
         </div>
@@ -367,6 +394,6 @@
     <!-- Toast容器 -->
     <div class="toast-container" id="toastContainer"></div>
     
-    <script src="js/admin.js"></script>
+    <script src="/admin/js/admin.js?v=20260913"></script>
 </body>
 </html>

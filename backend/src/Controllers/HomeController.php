@@ -48,20 +48,28 @@ class HomeController
      */
     private function calculateTimeSince(): array
     {
-        // 逝世日期：2011年11月01日
-        $deathDate = new \DateTime('2011-11-01');
+        // 逝世日期优先取后台配置（前台草稿不影响，公开接口只读取正式配置）
+        $configured = $this->configModel->getValue('death_date');
+        $deathDateStr = ($configured && preg_match('/^\d{4}-\d{2}-\d{2}$/', $configured))
+            ? $configured : '2011-11-01';
+
+        $birthConfigured = $this->configModel->getValue('birth_date');
+        $birthDateStr = ($birthConfigured && preg_match('/^\d{4}-\d{2}-\d{2}$/', $birthConfigured))
+            ? $birthConfigured : '1974-05-22';
+
+        $deathDate = new \DateTime($deathDateStr);
         $now = new \DateTime();
-        
+
         $interval = $deathDate->diff($now);
-        
+
         return [
             'years' => $interval->y,
             'months' => $interval->m,
             'days' => $interval->d,
             'totalDays' => $interval->days,
             'formatted' => sprintf('%d年%d月%d天', $interval->y, $interval->m, $interval->d),
-            'deathDate' => '2011-11-01',
-            'birthDate' => '1974-05-22'
+            'deathDate' => $deathDateStr,
+            'birthDate' => $birthDateStr
         ];
     }
 }

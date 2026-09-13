@@ -788,3 +788,123 @@ body {
         min-width: 600px;
     }
 }
+
+/* ==================== 草稿/发布工作流 ==================== */
+
+.btn-warning {
+    background: #F59E0B;
+    color: #fff;
+}
+.btn-warning:hover {
+    background: #D97706;
+}
+
+/* 草稿状态标签 */
+.status-draft {
+    background: #FEF3C7;
+    color: #B45309;
+}
+
+.status-changed {
+    background: #FEF9C3;
+    color: #A16207;
+    border: 1px dashed #CA8A04;
+}
+
+/* 草稿行高亮 */
+.data-table tr.row-draft {
+    background: #FFFBEB;
+}
+.data-table tr.row-changed {
+    background: #FEFCF0;
+}
+.data-table tr.row-draft:hover,
+.data-table tr.row-changed:hover {
+    background: #FEF3C7;
+}
+
+/* 照片卡片草稿状态 */
+.photo-card {
+    position: relative;
+}
+.photo-card.card-draft {
+    outline: 2px dashed #F59E0B;
+    outline-offset: 2px;
+}
+.photo-card.card-changed {
+    outline: 2px dashed #CA8A04;
+    outline-offset: 2px;
+}
+.photo-card-status {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 2;
+}
+.photo-card-status .status-badge {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+.photo-actions {
+    flex-wrap: wrap;
+}
+
+/* 草稿提示横幅 */
+.draft-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: linear-gradient(90deg, #FFFBEB 0%, #FEF3C7 100%);
+    border: 1px solid #FCD34D;
+    border-left: 4px solid #F59E0B;
+    border-radius: var(--radius-lg, 12px);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+.draft-banner-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+.draft-banner-icon {
+    font-size: 1.4rem;
+    line-height: 1.4;
+}
+.draft-banner-info strong {
+    color: #92400E;
+    display: block;
+    margin-bottom: 2px;
+}
+.draft-banner-info p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #A16207;
+}
+.draft-banner-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* 表单中处于草稿状态的输入框 */
+.is-draft-input {
+    border-color: #F59E0B !important;
+    background: #FFFBEB;
+}
+
+.form-tip {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: var(--color-gray-500, #6B7280);
+}
+
+/* 弹窗内按钮过多时允许换行 */
+.modal-footer {
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.modal-footer .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
